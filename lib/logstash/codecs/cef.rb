@@ -67,7 +67,7 @@ class LogStash::Codecs::CEF < LogStash::Codecs::Base
     header = ["CEF:0", "Elasticsearch", "Logstash", "1.0", @signature, @name, @sev].join("|")
     values = @fields.map {|name| get_value(name, data)}.join(" ")
     # values = values.map {|k,v| "#{k}=#{v}"}.join(" ")
-    @on_event.call(header + " " + values + "\n")
+    @on_event.call(data, header + "| " + values + "\n")
   end
 
   private
@@ -76,6 +76,8 @@ class LogStash::Codecs::CEF < LogStash::Codecs::Base
     case val
     when Hash
       return name + "=" + val.to_json
+    when LogStash::Timestamp
+      return name + "=" + val.to_iso8601
     else
       return name + "=" + val
     end
